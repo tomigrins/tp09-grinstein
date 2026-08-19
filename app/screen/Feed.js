@@ -19,7 +19,7 @@ const Feed = ({ Fotos = [], cantLikes, setCantLikes, liked, setLiked, publiAbier
 	}
 
 	return (
-		<div>
+		<>
 			<HistoriasBar Fotos={Fotos} />
 			<Publicaciones
 				Fotos={Fotos}
@@ -30,7 +30,7 @@ const Feed = ({ Fotos = [], cantLikes, setCantLikes, liked, setLiked, publiAbier
 				liked={liked}
 				setLiked={setLiked}
 			/>
-		</div>
+		</>
 	);
 };
 

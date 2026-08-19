@@ -1,66 +1,97 @@
-import React, { useState, useEffect } from 'react';
+import { View, Image, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { getFotos } from './app/service/api';
+import { useState, useEffect } from 'react';
 
 import Feed from './app/screen/Feed';
-import PubliAmpliadaScreen from './app/screen/PubliAmpliadaScreen';
 import Perfil from './app/screen/Perfil';
 
-const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   const [Fotos, setFotos] = useState([]);
   const [cantLikes, setCantLikes] = useState(1000);
   const [liked, setLiked] = useState(false);
   const [publiAbierta, setpubliAbierta] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getFotos().then((data) => setFotos(data)).catch(() => {});
+    getFotos()
+      .then((data) => {
+        setFotos(data);
+      })
+      .catch(() => {
+        setFotos([]);
+      });
   }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.splash}>
+        <Image
+          source={require('./assets/igLogo.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </View>
+    );
+  }
 
   return (
     <>
       <StatusBar style="dark" />
+
       <NavigationContainer>
-        <Tab.Navigator
-          screenOptions={({ route }) => ({
-            tabBarIcon: ({ focused, color, size }) => {
-              let iconName;
-              if (route.name === 'Feed') {
-                iconName = focused ? 'home' : 'home-outline';
-              } else if (route.name === 'Perfil') {
-                iconName = focused ? 'person' : 'person-outline';
-              }
-              return <Ionicons name={iconName} size={size} color={color} />;
-            },
-          })}
-        >
-          <Tab.Screen 
-            name="Feed" 
+        <Stack.Navigator>
+          <Stack.Screen
+            name="Feed"
             options={{ title: 'Feed' }}
-            children={() => (
-              <Feed 
-                Fotos={Fotos} 
-                cantLikes={cantLikes} 
-                setCantLikes={setCantLikes} 
-                publiAbierta={publiAbierta} 
-                setpubliAbierta={setpubliAbierta} 
-                liked={liked} 
-                setLiked={setLiked} 
+          >
+            {() => (
+              <Feed
+                Fotos={Fotos}
+                cantLikes={cantLikes}
+                setCantLikes={setCantLikes}
+                publiAbierta={publiAbierta}
+                setpubliAbierta={setpubliAbierta}
+                liked={liked}
+                setLiked={setLiked}
               />
             )}
-          />
-          <Tab.Screen 
-            name="Perfil" 
+          </Stack.Screen>
+
+          <Stack.Screen
+            name="Perfil"
             options={{ title: 'Perfil' }}
-            children={() => <Perfil fotos={Fotos} />}
-          />
-        </Tab.Navigator>
+          >
+            {() => <Perfil fotos={Fotos} />}
+          </Stack.Screen>
+        </Stack.Navigator>
       </NavigationContainer>
     </>
   );
 }
- 
+
+const styles = StyleSheet.create({
+  splash: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+
+  logo: {
+    width: 200,
+    height: 200,
+  },
+});
