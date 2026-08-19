@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
     View,
     Image,
@@ -7,76 +7,86 @@ import {
     StyleSheet,
     ScrollView,
 } from 'react-native';
+
 import { useNavigation } from '@react-navigation/native';
 
 import Perfiles from "../Perfiles/Index";
 import Interacciones from '../Interacciones/Index';
 import Comentario from '../Comentario/index';
-import type { Foto } from "../../services/api";
 
-const PubliAmpliada: React.FC<{
-    Fotos?: Foto[];
-    cantLikes: number;
-    setCantLikes: React.Dispatch<React.SetStateAction<number>>;
-    publiAbierta?: boolean;
-    setpubliAbierta: React.Dispatch<React.SetStateAction<boolean>>;
-    liked: boolean;
-    setLiked: React.Dispatch<React.SetStateAction<boolean>>;
-}> = ({
-    Fotos,
+const PubliAmpliada = ({
+    Fotos = [],
+    publicacion,
     cantLikes,
     setCantLikes,
     publiAbierta,
     setpubliAbierta,
     liked,
     setLiked,
+    perfil,
 }) => {
+
     const navigation = useNavigation();
 
-    const [fotoSrc, setFotoSrc] = useState('');
+    const username =
+        perfil?.username || 'HolaSoyFanFlecha';
 
-    useEffect(() => {
-        if (fotoSrc) return;
-        if (!Array.isArray(Fotos) || Fotos.length === 0) return;
+    const fotoPerfil =
+        perfil?.fotoPerfil || '';
 
-        const idx = Math.floor(Math.random() * Fotos.length);
-        const item = Fotos[idx];
-
-        setFotoSrc(
-            typeof item === 'string'
-                ? item
-                : item?.url ?? ''
-        );
-    }, [Fotos, fotoSrc]);
+    const fotoPublicacion =
+        typeof publicacion === 'string'
+            ? publicacion
+            : publicacion?.url || '';
 
     return (
         <View style={styles.container}>
 
+            {/* HEADER */}
             <View style={styles.creator}>
+
                 <TouchableOpacity
-                    onPress={() => navigation.navigate('Perfil')}
+                    onPress={() =>
+                        navigation.navigate('Perfil', {
+                            username,
+                            fotoPerfil,
+                        })
+                    }
                     activeOpacity={0.7}
                 >
-                    <Perfiles Fotos={Fotos} />
+                    <Perfiles
+                        Fotos={Fotos}
+                        fotoPerfil={fotoPerfil}
+                        username={username}
+                    />
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     onPress={() => setpubliAbierta(false)}
                     style={styles.closeButton}
                 >
-                    <Text style={styles.closeText}>x</Text>
+                    <Text style={styles.closeText}>
+                        x
+                    </Text>
                 </TouchableOpacity>
+
             </View>
 
+            {/* MISMA FOTO QUE SE TOCÓ EN FEED */}
             <View style={styles.photoWrap}>
+
                 <Image
-                    source={{ uri: fotoSrc }}
+                    source={{ uri: fotoPublicacion }}
                     style={styles.photo}
                 />
+
             </View>
 
+            {/* INFORMACIÓN */}
             <View style={styles.info}>
+
                 <View style={styles.interactionsRow}>
+
                     <Interacciones
                         cantLikes={cantLikes}
                         setCantLikes={setCantLikes}
@@ -85,6 +95,7 @@ const PubliAmpliada: React.FC<{
                     />
 
                     <View style={styles.likesInfo}>
+
                         <Text>
                             Liked by{' '}
                             <Text style={{ fontWeight: '700' }}>
@@ -95,14 +106,19 @@ const PubliAmpliada: React.FC<{
                                 {cantLikes} others
                             </Text>
                         </Text>
+
                     </View>
+
                 </View>
 
                 <ScrollView style={styles.comments}>
+
                     <Comentario Fotos={Fotos} />
                     <Comentario Fotos={Fotos} />
                     <Comentario Fotos={Fotos} />
+
                 </ScrollView>
+
             </View>
 
         </View>
@@ -110,6 +126,7 @@ const PubliAmpliada: React.FC<{
 };
 
 const styles = StyleSheet.create({
+
     container: {
         flex: 1,
         backgroundColor: '#fff',
@@ -170,6 +187,7 @@ const styles = StyleSheet.create({
         width: '100%',
         marginTop: 8,
     },
+
 });
 
 export default PubliAmpliada;

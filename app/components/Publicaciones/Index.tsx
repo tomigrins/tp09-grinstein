@@ -1,85 +1,129 @@
-import React, { useEffect, useState } from 'react';
-import { View, Image, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import Interacciones from '../Interacciones/Index';
-import type { Foto } from "../../services/api";
+import React from 'react';
+import {
+    View,
+    Image,
+    Text,
+    TouchableOpacity,
+    StyleSheet,
+} from 'react-native';
 
-const Publicaciones: React.FC<{ Fotos?: Foto[]; cantLikes: number; setCantLikes: React.Dispatch<React.SetStateAction<number>>; publiAbierta: boolean; setpubliAbierta: React.Dispatch<React.SetStateAction<boolean>>; liked: boolean; setLiked: React.Dispatch<React.SetStateAction<boolean>> }> = ({ Fotos, cantLikes, setCantLikes, publiAbierta, setpubliAbierta, liked, setLiked }) => {
-	const [fotoSrc, setFotoSrc] = useState('');
+import Perfiles from '../Perfiles/Index';
 
-	useEffect(() => {
-		if (fotoSrc) return;
-		if (!Array.isArray(Fotos) || Fotos.length === 0) return;
-		const idx = Math.floor(Math.random() * Fotos.length);
-		const item = Fotos[idx];
-		setFotoSrc(typeof item === 'string' ? item : item?.url ?? '');
-	}, [Fotos, fotoSrc]);
+const Publicaciones = ({
+    Fotos = [],
+    cantLikes,
+    setCantLikes,
+    publiAbierta,
+    setpubliAbierta,
+    liked,
+    setLiked,
+    perfil,
+    setPublicacionSeleccionada,
+}) => {
 
-	return (
-		<View style={styles.container}>
-			<View style={styles.header}>
-				<Image source={{ uri: fotoSrc }} style={styles.avatar} />
-				<Text style={styles.username}>FanFelcha10</Text>
-				<Text style={styles.time}>5h</Text>
-			</View>
+    const fotoPerfil =
+        perfil?.fotoPerfil || '';
 
-			<TouchableOpacity onPress={() => setpubliAbierta(true)} style={styles.imageWrap}>
-				<Image source={{ uri: fotoSrc }} style={styles.photo} />
-			</TouchableOpacity>
+    const username =
+        perfil?.username || 'HolaSoyFanFlecha';
 
-			<Interacciones cantLikes={cantLikes} setCantLikes={setCantLikes} liked={liked} setLiked={setLiked} />
+    return (
+        <View style={styles.container}>
 
-			<View style={styles.description}>
-				<Text>{cantLikes} likes</Text>
-				<View style={styles.commentBlock}>
-					<Text><Text style={{fontWeight: '700'}}>FanFelcha10</Text> El mejor programador</Text>
-					<Text><Text style={{fontWeight: '700'}}>See translation</Text></Text>
-				</View>
-				<View>
-					<Text>View all 100 comments</Text>
-					<Text>Add a comment...</Text>
-				</View>
-			</View>
-		</View>
-	)
-}
+            {Fotos.map((foto, index) => {
+
+                const fotoUrl =
+                    typeof foto === 'string'
+                        ? foto
+                        : foto?.url || '';
+
+                return (
+                    <View
+                        key={foto?.id ?? index}
+                        style={styles.publicacion}
+                    >
+
+                        {/* HEADER DEL USUARIO */}
+                        <View style={styles.header}>
+
+                            <Perfiles
+                                Fotos={Fotos}
+                                fotoPerfil={fotoPerfil}
+                                username={username}
+                            />
+
+                        </View>
+
+                        {/* PUBLICACIÓN */}
+                        <TouchableOpacity
+                            activeOpacity={0.9}
+                            onPress={() => {
+
+                                // Guardamos EXACTAMENTE esta foto
+                                setPublicacionSeleccionada(foto);
+
+                                // Abrimos detalle
+                                setpubliAbierta(true);
+                            }}
+                        >
+                            <Image
+                                source={{ uri: fotoUrl }}
+                                style={styles.photo}
+                            />
+                        </TouchableOpacity>
+
+                        {/* INFO */}
+                        <View style={styles.info}>
+
+                            <Text style={styles.likes}>
+                                {cantLikes} likes
+                            </Text>
+
+                        </View>
+
+                    </View>
+                );
+            })}
+
+        </View>
+    );
+};
 
 const styles = StyleSheet.create({
-	container: {
-		marginBottom: 12,
-	},
-	header: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		padding: 8,
-	},
-	avatar: {
-		width: 40,
-		height: 40,
-		borderRadius: 20,
-		backgroundColor: '#ccc',
-		marginRight: 8,
-	},
-	username: {
-		fontWeight: '700',
-		marginRight: 8,
-	},
-	time: {
-		color: '#666',
-	},
-	imageWrap: {
-		alignItems: 'center',
-	},
-	photo: {
-		width: '100%',
-		height: 300,
-		backgroundColor: '#eee',
-	},
-	description: {
-		padding: 8,
-	},
-	commentBlock: {
-		marginTop: 6,
-	},
+
+    container: {
+        width: '100%',
+        backgroundColor: '#fff',
+    },
+
+    publicacion: {
+        width: '100%',
+        backgroundColor: '#fff',
+        marginBottom: 20,
+    },
+
+    header: {
+        width: '100%',
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+    },
+
+    photo: {
+        width: '100%',
+        aspectRatio: 1,
+        backgroundColor: '#eee',
+    },
+
+    info: {
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+    },
+
+    likes: {
+        fontWeight: '700',
+        fontSize: 14,
+    },
+
 });
 
 export default Publicaciones;
